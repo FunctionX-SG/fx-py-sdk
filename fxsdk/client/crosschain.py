@@ -40,10 +40,12 @@ class BridgeFee:
 
     def get_fast(self, chain_id: str, denom: str) -> int:
         result = requests.get(self._get_api(chain_id, denom))
+        print(result.text)
         return result.json()['data']['rapid']
 
     def get_standard(self, chain_id: str, denom: str) -> int:
         result = requests.get(self._get_api(chain_id, denom))
+        print(result.text)
         return result.json()['data']['standard']
 
 
@@ -65,7 +67,7 @@ class CrossChainClient(Client, BridgeFee):
         return response.channels
 
     def ibc_transfer(self, tx_builder: TxBuilder, to_address: str, amount: Coin, channel: str, target: CrossChainTarget,
-                     mode: Optional[BroadcastMode] = BROADCAST_MODE_UNSPECIFIED):
+                     mode: BroadcastMode = BROADCAST_MODE_UNSPECIFIED):
         router = ''
         fee = Coin(denom=amount.denom, amount='0')
         if target is CrossChainTarget.Ethereum:
@@ -87,7 +89,7 @@ class CrossChainClient(Client, BridgeFee):
             return self.build_and_broadcast_tx(tx_builder=tx_builder, msgs=[msg], mode=mode)
 
     def ibc_transfer_mx2mx(self, tx_builder: TxBuilder, amount: Coin, from_channel: str, to_channel: str,
-                           mode: Optional[BroadcastMode] = BROADCAST_MODE_UNSPECIFIED):
+                           mode: BroadcastMode = BROADCAST_MODE_UNSPECIFIED):
         address = tx_builder.from_address()
         to_address = "{}|transfer/{}:{}".format(address.to_string("fx"), to_channel, address.to_string())
         self.ibc_transfer(tx_builder=tx_builder, to_address=to_address, amount=amount, channel=from_channel,
